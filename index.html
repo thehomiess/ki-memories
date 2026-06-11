@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chapter VII | The Homies</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Cormorant Garamond (Headings), Inter (Text), Caveat (Handwritten Notes) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive'],
+                    },
+                    colors: {
+                        themebg: '#EBE5DF', 
+                        cardbg: '#F8F6F1',  
+                        themetext: '#1A1A1A',
+                        thememuted: '#7A7671',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #EBE5DF;
+            color: #1A1A1A;
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
+
+        /* Hide main scrollbar */
+        ::-webkit-scrollbar { display: none; }
+
+        /* Custom scrollbar for long paragraphs inside profile cards */
+        .card-scroll::-webkit-scrollbar { display: block; width: 3px; }
+        .card-scroll::-webkit-scrollbar-track { background: transparent; }
+        .card-scroll::-webkit-scrollbar-thumb { background-color: #D1CCC5; border-radius: 10px; }
+
+        /* Horizontal Snap Scrolling */
+        .snap-container { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .snap-item { scroll-snap-align: center; }
+
+        /* General Transitions */
+        .fade-transform { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-active { opacity: 1; visibility: visible; }
+        
+        /* Scroll reveal animation */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-in-section.is-visible { opacity: 1; transform: none; }
+
+        /* Hamburger Animation */
+        .hamburger-active .line-1 { transform: translateY(8px) rotate(45deg); }
+        .hamburger-active .line-2 { opacity: 0; }
+        .hamburger-active .line-3 { transform: translateY(-8px) rotate(-45deg); }
+
+        /* 3D Flip Card CSS for the Lightbox */
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .is-flipped .flip-inner { transform: rotateY(180deg); }
+        
+        /* Utility */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-themetext selection:bg-[#D1CCC5]">
+
+    <!-- FIXED PARALLAX BACKGROUND -->
+    <div class="fixed inset-0 z-[-2]">
+        <img src="bg4.jpg" class="w-full h-full object-cover opacity-90" alt="Group Parallax">
+    </div>
+    <div class="fixed inset-0 z-[-1] bg-gradient-to-b from-[#EBE5DF]/20 via-[#EBE5DF]/50 to-[#EBE5DF] backdrop-blur-[2px]"></div>
+
+    <!-- HAMBURGER NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full p-6 md:p-8 z-50 flex justify-between items-center transition-all duration-300" id="navbar">
+        <div class="font-serif text-2xl tracking-[0.2em] font-light z-50 cursor-pointer" onclick="window.scrollTo(0,0)">VII</div>
+        <button onclick="toggleMenu()" class="z-50 space-y-2 group p-2 focus:outline-none" id="hamburgerBtn">
+            <div class="line-1 w-8 h-[1px] bg-themetext transition-all duration-300 ease-in-out origin-center"></div>
+            <div class="line-2 w-8 h-[1px] bg-themetext transition-all duration-300 ease-in-out"></div>
+            <div class="line-3 w-8 h-[1px] bg-themetext transition-all duration-300 ease-in-out origin-center"></div>
+        </button>
+    </nav>
+
+    <!-- FULLSCREEN MENU OVERLAY -->
+    <div id="fullMenu" class="fixed inset-0 bg-[#EBE5DF] z-40 flex flex-col justify-center items-center opacity-0 pointer-events-none fade-transform scale-105">
+        <a href="#hero" onclick="toggleMenu()" class="font-serif text-5xl md:text-7xl mb-8 font-light hover:italic transition-all hover:text-gray-500">Home.</a>
+        <a href="#homies" onclick="toggleMenu()" class="font-serif text-5xl md:text-7xl mb-8 font-light hover:italic transition-all hover:text-gray-500">The Homies.</a>
+        <a href="#archive" onclick="toggleMenu()" class="font-serif text-5xl md:text-7xl mb-12 font-light hover:italic transition-all hover:text-gray-500">The Archive.</a>
+        
+        <div class="h-[1px] w-24 bg-themetext/20 mb-12"></div>
+        <button onclick="openGameScreen()" class="font-sans text-xs tracking-[0.3em] uppercase text-themetext border border-themetext px-8 py-4 hover:bg-themetext hover:text-themebg transition-colors">
+            Play a Game
+        </button>
+    </div>
+
+    <!-- HERO SECTION -->
+    <header id="hero" class="relative w-full h-[100svh] flex flex-col items-center justify-center text-center px-6">
+        <div class="fade-in-section is-visible">
+            <p class="font-sans text-xs tracking-[0.3em] uppercase text-themetext/70 mb-6">A Digital Archive</p>
+            <h1 class="font-serif text-6xl md:text-8xl lg:text-9xl font-light tracking-tight leading-none mb-6">
+                The Seven <br>
+                <span class="italic text-gray-700">of Us.</span>
+            </h1>
+            <p class="max-w-md mx-auto font-sans text-sm md:text-base font-light leading-relaxed text-gray-800">
+                A curated collection of our chaotic, beautiful, and unforgettable moments. Documenting the people who make life feel like cinema.
+            </p>
+        </div>
+        <a href="#homies" class="absolute bottom-12 animate-bounce opacity-50 hover:opacity-100 transition-opacity">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </a>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="bg-themebg relative z-10 rounded-t-[2.5rem] md:rounded-t-[4rem] shadow-[0_-20px_50px_rgba(0,0,0,0.05)] pt-12 border-t border-white/50 overflow-hidden">
+        
+        <!-- THE HOMIES SECTION -->
+        <section id="homies" class="py-16 md:py-24">
+            <div class="px-6 md:px-12 mb-12 flex justify-between items-end fade-in-section">
+                <h2 class="font-serif text-4xl md:text-6xl font-light">The Homies</h2>
+                <p class="text-[10px] md:text-xs uppercase tracking-[0.2em] text-thememuted flex items-center gap-2">
+                    Swipe <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </p>
+            </div>
+
+            <div class="snap-container flex overflow-x-auto gap-6 px-6 md:px-12 pb-16 pt-4 hide-scrollbar w-full">
+                <!-- PROFILE 1 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="/profile/ag.jpg" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Aadhar</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Designer</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Aarav is the one who keeps us all anchored. Whenever the group is spiraling into pure chaos, he’s the quiet observer in the corner who suddenly delivers the most hilarious, deadpan joke you've ever heard.</p>
+                        <p>Beyond his serious exterior, he has the biggest heart. If it's 3 AM and someone is broken down on the side of the highway, he's the first one in the car with a toolbox ready to help.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 2 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Fiza</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Dancer</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Pure, unfiltered energy. Priya is the reason 90% of our adventures happen. She’ll call you on a random Tuesday night and convince you that driving three hours just to get a specific type of dessert is a completely rational idea.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 3 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="profile/jalpen.jpg" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Jalpen</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Critic</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Rohan communicates exclusively through sarcasm, movie quotes, and judging our food choices. He is incredibly smart, brutally honest, and will defend his friends fiercely in any situation.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 4 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Sweta</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Muse</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Ananya brings the aesthetic to everything we do. She’s the one taking all the beautiful candids of us (while we are busy ruining her photos). She forces us to stop and appreciate the little things.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 5 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="profile/deep.jpg" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Deep</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Wanderer</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Kabir is literally never in one place for too long. He’s the most spontaneous person we know. If there's a mountain to climb or an obscure indie band playing in a basement, he’s already there.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 6 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Krishna</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Fixer</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Need life advice? Need someone to explain your taxes to you? Maya is the answer. She is intimidatingly smart, incredibly driven, and fiercely protective of our group.</p>
+                    </div>
+                </div>
+
+                <!-- PROFILE 7 -->
+                <div class="snap-item shrink-0 w-[85vw] md:w-[400px] h-[80vh] min-h-[600px] max-h-[750px] bg-cardbg rounded-[2rem] p-5 shadow-sm flex flex-col border border-white/40">
+                    <div class="w-full aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 relative shrink-0 shadow-inner">
+                        <img src="/profile/karan.jpg" class="w-full h-full object-cover" alt="Portrait">
+                    </div>
+                    <div class="flex-shrink-0 mb-3 px-2">
+                        <h3 class="font-serif text-3xl md:text-4xl">Karan</h3>
+                        <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-thememuted mt-1">The Wildcard</p>
+                    </div>
+                    <div class="card-scroll flex-grow overflow-y-auto px-2 font-sans text-sm text-gray-600 font-light leading-relaxed">
+                        <p class="mb-4">Dev operates on a completely different frequency than the rest of humanity. He has the most niche hobbies, knows random facts about everything, and is responsible for all of our most confusing and memorable nights out.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Divider Line -->
+        <div class="w-full max-w-7xl mx-auto px-6"><div class="h-[1px] w-full bg-[#D1CCC5]/50"></div></div>
+
+        <!-- THE ARCHIVE SECTION -->
+        <section id="archive" class="py-20 px-4 md:px-12 fade-in-section max-w-[1600px] mx-auto">
+            <div class="mb-16 text-center max-w-2xl mx-auto">
+                <h2 class="font-serif text-4xl md:text-6xl font-light mb-4">The Archive.</h2>
+                <p class="font-sans text-sm text-thememuted font-light">A visual diary of our existence. Tap any memory to view.</p>
+            </div>
+
+            <div class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 [column-fill:_balance]">
+                
+                <!-- NEW VIDEO BLOCK -->
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden bg-black shadow-sm" onclick="openModal('video', 'vid.mp4', 'Kabir almost dropped his phone right after this was taken 😂')">
+                    <!-- Video Preview -->
+                    <video src="vid.mp4" class="w-full aspect-square object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" muted playsinline loop autoplay></video>
+                    <!-- Play Button Icon Overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <svg class="w-8 h-8 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                    </div>
+                </div>
+
+                <!-- IMAGE BLOCKS -->
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'bg3.jpg', 'The roadtrip where we got entirely lost and loved every second of it.')">
+                    <img src="bg3.jpg" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'bg.jpg', 'Summer 2023. Priya forced us all to wake up at 5 AM for this lighting.')">
+                    <img src="bg.jpg" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80', 'Nobody remembers what was so funny, but my stomach hurt from laughing.')">
+                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80" class="w-full aspect-square object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=800&q=80', 'The view was almost as good as the company.')">
+                    <img src="https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=400&q=80" class="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'https://images.unsplash.com/photo-1506869640319-fea1a2ab8e40?auto=format&fit=crop&w=800&q=80', 'Late night diner run. Dev ordered pancakes at 2 AM.')">
+                    <img src="https://images.unsplash.com/photo-1506869640319-fea1a2ab8e40?auto=format&fit=crop&w=400&q=80" class="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'https://images.unsplash.com/photo-1464375117522-1314d6c1414f?auto=format&fit=crop&w=800&q=80', 'Finding hidden spots in the city.')">
+                    <img src="https://images.unsplash.com/photo-1464375117522-1314d6c1414f?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80', 'Unplanned adventures are always the best ones.')">
+                    <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=400&q=80" class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm" onclick="openModal('img', 'bg3.jpg', 'Taking a moment to breathe.')">
+                    <img src="bg3.jpg" class="w-full aspect-square object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+            </div>
+        </section>
+
+        <!-- HIGH-END AESTHETIC FOOTER -->
+        <footer class="mt-20 border-t border-[#D1CCC5]/50 bg-gradient-to-b from-themebg to-[#E2DBD4] pt-24 pb-12 px-6">
+            <div class="max-w-4xl mx-auto flex flex-col items-center text-center fade-in-section">
+                <p class="font-serif italic text-2xl md:text-4xl text-themetext mb-8 font-light">
+                    "To the nights that turned into mornings,<br>and the friends that turned into family."
+                </p>
+                <div class="h-[1px] w-24 bg-themetext/20 mb-10"></div>
+                <h2 class="font-serif text-6xl md:text-8xl tracking-widest text-themetext/10 mb-8 select-none">VII</h2>
+                <div class="flex flex-col md:flex-row items-center gap-4 text-xs font-sans tracking-[0.2em] uppercase text-thememuted">
+                    <span>Est. 2020</span><span class="hidden md:block">&bull;</span>
+                    <span>The Homies Archive</span><span class="hidden md:block">&bull;</span>
+                    <span>Forever</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- 3D FLIP LIGHTBOX MODAL -->
+    <div id="mediaModal" class="fixed inset-0 bg-[#EBE5DF]/95 z-[60] flex-col items-center justify-center p-4 backdrop-blur-md opacity-0 pointer-events-none fade-transform fixed inset-0 flex">
+        <button onclick="closeModal()" class="absolute top-6 right-6 md:top-10 md:right-10 text-themetext p-2 hover:opacity-50 transition-opacity z-[70]">
+            <svg class="w-10 h-10 font-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div class="absolute bottom-8 font-sans text-xs tracking-widest uppercase text-thememuted animate-pulse z-[70] pointer-events-none">
+            Hold to flip <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </div>
+        <div id="modalContent" class="w-full max-w-4xl max-h-[85vh] flex items-center justify-center perspective-1000"></div>
+    </div>
+
+    <!-- GAME SCREEN OVERLAY -->
+    <div id="gameScreen" class="fixed inset-0 bg-themebg z-[80] flex flex-col items-center justify-center opacity-0 pointer-events-none fade-transform">
+        <button onclick="closeGameScreen()" class="absolute top-6 right-6 md:top-10 md:right-10 text-themetext p-2 hover:opacity-50 transition-opacity z-[90]">
+            <svg class="w-10 h-10 font-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="text-center mb-4 px-4 mt-8">
+            <h2 class="font-serif text-3xl md:text-5xl font-light mb-2">Reconstruct the Memory.</h2>
+            <p class="font-sans text-[10px] md:text-xs text-thememuted font-light uppercase tracking-[0.2em]">Tap two pieces to swap them</p>
+        </div>
+
+        <div class="mb-6 flex flex-col items-center">
+            <span class="font-sans text-[10px] uppercase tracking-widest text-thememuted mb-2">Target Image</span>
+            <img id="referenceImg" src="" class="w-16 h-16 md:w-20 md:h-20 object-cover rounded shadow-sm opacity-90 border border-[#D1CCC5]">
+        </div>
+
+        <!-- The Puzzle Grid -->
+        <div id="puzzleBoard" class="grid grid-cols-3 gap-1 w-[85vw] max-w-[350px] aspect-square bg-cardbg p-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-[#D1CCC5] transition-all duration-300">
+            <!-- Tiles injected via JS -->
+        </div>
+
+        <!-- Skip / Next Photo Button -->
+        <div class="mt-8">
+            <button onclick="startPuzzle()" class="px-6 py-3 border border-themetext text-[10px] md:text-xs tracking-widest uppercase hover:bg-themetext hover:text-themebg transition-colors shadow-sm">
+                Next Photo &rarr;
+            </button>
+        </div>
+
+        <!-- Success Modal (Inside Game Screen) -->
+        <div id="gameSuccess" class="absolute inset-0 bg-themebg/95 backdrop-blur-md flex flex-col items-center justify-center opacity-0 pointer-events-none fade-transform z-[85]">
+            <h3 class="font-serif text-5xl mb-6 text-center font-light">Memory Unlocked!</h3>
+            
+            <div class="bg-cardbg p-4 pb-12 rounded-sm shadow-2xl transform rotate-2 mb-8 border border-gray-200 w-[80vw] max-w-[350px]">
+                <img id="successImage" src="" class="w-full aspect-square object-cover mb-4 shadow-inner">
+                <p class="font-hand text-2xl text-center text-themetext">You put the pieces together.</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="closeGameScreen()" class="px-6 py-3 border border-themetext text-[10px] md:text-xs tracking-widest uppercase hover:bg-themetext hover:text-themebg transition-colors">Return</button>
+                <button onclick="startPuzzle()" class="px-6 py-3 bg-themetext text-themebg border border-themetext text-[10px] md:text-xs tracking-widest uppercase hover:bg-themebg hover:text-themetext transition-colors">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        // Hamburger Menu
+        const menu = document.getElementById('fullMenu');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+        function toggleMenu() {
+            menu.classList.toggle('opacity-0');
+            menu.classList.toggle('pointer-events-none');
+            menu.classList.toggle('scale-105');
+            hamburgerBtn.classList.toggle('hamburger-active');
+            document.body.style.overflow = menu.classList.contains('opacity-0') ? 'auto' : 'hidden';
+        }
+
+        // Lightbox, 3D Flip & Video Fix
+        const modal = document.getElementById('mediaModal');
+        const content = document.getElementById('modalContent');
+
+        function openModal(type, src, note = "A core memory.") {
+            content.innerHTML = ''; 
+            let innerMedia = '';
+            
+            if(type === 'img') {
+                innerMedia = `<img src="${src}" class="max-h-[80vh] max-w-full rounded-md shadow-2xl object-contain no-select pointer-events-none">`;
+            } else if (type === 'video') {
+                // IMPORTANT FIX: Removed 'pointer-events-none' and added 'controls'
+                innerMedia = `<video src="${src}" class="max-h-[80vh] max-w-full rounded-md shadow-2xl no-select" controls autoplay loop playsinline></video>`;
+            }
+
+            content.innerHTML = `
+                <div class="relative w-full h-full flex items-center justify-center cursor-pointer flip-container" id="flipContainer">
+                    <div class="flip-inner relative w-full h-full transition-transform duration-700 preserve-3d flex items-center justify-center">
+                        <div class="backface-hidden flex items-center justify-center relative z-10 w-full h-full">
+                            ${innerMedia}
+                        </div>
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 flex items-center justify-center">
+                            <div class="bg-cardbg rounded-xl shadow-2xl p-8 md:p-14 w-[90%] max-w-lg aspect-square flex flex-col items-center justify-center border border-[#D1CCC5]">
+                                <p class="font-hand text-3xl md:text-4xl text-themetext text-center leading-relaxed transform -rotate-2">"${note}"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('modal-active');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
+
+            const flipContainer = document.getElementById('flipContainer');
+            
+            // Mouse Events (Desktop)
+            flipContainer.addEventListener('mousedown', (e) => {
+                // Don't flip if clicking the video player controls!
+                if(e.target.tagName !== 'VIDEO') {
+                    flipContainer.classList.add('is-flipped');
+                }
+            });
+            flipContainer.addEventListener('mouseup', () => flipContainer.classList.remove('is-flipped'));
+            flipContainer.addEventListener('mouseleave', () => flipContainer.classList.remove('is-flipped'));
+            
+            // Touch Events (Mobile)
+            flipContainer.addEventListener('touchstart', (e) => { 
+                // Don't flip if touching the video player controls!
+                if(e.target.tagName !== 'VIDEO') {
+                    e.preventDefault(); 
+                    flipContainer.classList.add('is-flipped'); 
+                }
+            });
+            flipContainer.addEventListener('touchend', (e) => { 
+                if(e.target.tagName !== 'VIDEO') {
+                    e.preventDefault(); 
+                    flipContainer.classList.remove('is-flipped'); 
+                }
+            });
+        }
+
+        function closeModal() {
+            modal.classList.remove('modal-active');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'auto';
+            setTimeout(() => { content.innerHTML = ''; }, 500); 
+        }
+
+        modal.addEventListener('click', function(e) {
+            if(e.target === modal || e.target.parentElement === modal) closeModal();
+        });
+
+        // Scroll Animations
+        document.addEventListener("DOMContentLoaded", function() {
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-in-section').forEach((section) => observer.observe(section));
+        });
+
+        // --- The Jigsaw Game Logic ---
+        
+        const gamePhotos = [
+            'bg4.jpg','bg1.jpg', 'bg2.jpg'
+        ];
+
+        let currentPuzzleImg = '';
+        let puzzleTiles = [];
+        let selectedTileIndex = null;
+
+        function openGameScreen() {
+            toggleMenu(); 
+            document.getElementById('gameScreen').classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
+            startPuzzle();
+        }
+
+        function closeGameScreen() {
+            document.getElementById('gameScreen').classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'auto';
+        }
+
+        function startPuzzle() {
+            const board = document.getElementById('puzzleBoard');
+            board.classList.add('gap-1', 'p-2');
+            board.classList.remove('gap-0', 'p-0');
+
+            document.getElementById('gameSuccess').classList.add('opacity-0', 'pointer-events-none');
+            selectedTileIndex = null;
+            
+            currentPuzzleImg = gamePhotos[Math.floor(Math.random() * gamePhotos.length)];
+            document.getElementById('referenceImg').src = currentPuzzleImg;
+            
+            puzzleTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+            do {
+                for (let i = puzzleTiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [puzzleTiles[i], puzzleTiles[j]] = [puzzleTiles[j], puzzleTiles[i]];
+                }
+            } while (checkWinCondition()); 
+
+            renderPuzzle();
+        }
+
+        function renderPuzzle() {
+            const board = document.getElementById('puzzleBoard');
+            board.innerHTML = '';
+            
+            puzzleTiles.forEach((correctPieceID, boardPosition) => {
+                const tile = document.createElement('div');
+                tile.className = 'w-full h-full bg-cover cursor-pointer rounded-sm transition-all duration-200 ease-in-out relative shadow-sm';
+                tile.style.backgroundImage = `url('${currentPuzzleImg}')`;
+                tile.style.backgroundSize = '300% 300%';
+                
+                const row = Math.floor(correctPieceID / 3);
+                const col = correctPieceID % 3;
+                tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+                tile.style.touchAction = 'manipulation';
+                
+                if (selectedTileIndex === boardPosition) {
+                    tile.classList.add('scale-90', 'opacity-80', 'ring-2', 'ring-offset-2', 'ring-themetext', 'z-10');
+                } else {
+                    tile.classList.add('hover:scale-[0.98]');
+                }
+
+                tile.onclick = () => handleTileClick(boardPosition);
+                board.appendChild(tile);
+            });
+        }
+
+        function handleTileClick(boardPosition) {
+            if (selectedTileIndex === null) {
+                selectedTileIndex = boardPosition;
+                renderPuzzle();
+            } else {
+                if (selectedTileIndex !== boardPosition) {
+                    const temp = puzzleTiles[selectedTileIndex];
+                    puzzleTiles[selectedTileIndex] = puzzleTiles[boardPosition];
+                    puzzleTiles[boardPosition] = temp;
+                }
+                
+                selectedTileIndex = null;
+                renderPuzzle();
+                
+                setTimeout(() => {
+                    if (checkWinCondition()) {
+                        const board = document.getElementById('puzzleBoard');
+                        board.classList.remove('gap-1', 'p-2');
+                        board.classList.add('gap-0', 'p-0');
+                        setTimeout(showWinScreen, 600);
+                    }
+                }, 300);
+            }
+        }
+
+        function checkWinCondition() {
+            return puzzleTiles.every((val, index) => val === index);
+        }
+
+        function showWinScreen() {
+            document.getElementById('successImage').src = currentPuzzleImg;
+            document.getElementById('gameSuccess').classList.remove('opacity-0', 'pointer-events-none');
+        }
+    </script>
+</body>
+</html>
